@@ -77,6 +77,12 @@ const RoomPage = () => {
     },
   });
 
+  const { mutate: destroyRoom } = useMutation({
+    mutationFn: async () => {
+      await client.room.delete(null, { query: { roomId } });
+    },
+  });
+
   const { mutate: sendMessage, isPending } = useMutation({
     mutationFn: async ({ text }: { text: string }) => {
       await client.messages.post(
@@ -143,13 +149,16 @@ const RoomPage = () => {
           </div>
         </div>
 
-        <button className="text-xs bg-zinc-800 hover:bg-red-500 px-3 py-1.5 rounded-lg text-zinc-400 hover:text-white font-bold transition-all duration-300 flex items-center gap-2 disabled:opacity-50 cursor-pointer">
+        <button
+          className="text-xs bg-zinc-800 hover:bg-red-500 px-3 py-1.5 rounded-lg text-zinc-400 hover:text-white font-bold transition-all duration-300 flex items-center gap-2 disabled:opacity-50 cursor-pointer"
+          onClick={() => destroyRoom()}
+        >
           DESTROY NOW
         </button>
       </header>
 
       {/* Messages */}
-      <div className="flex-1 p-4 space-y-4 overflow-y-scroll">
+      <div className="flex-1 p-4 space-y-4 overflow-y-auto">
         {messages?.messages.length === 0 && (
           <div className="flex items-center justify-center h-full">
             <p className="text-zinc-600 text-sm font-mono">
