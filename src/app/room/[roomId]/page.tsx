@@ -1,9 +1,13 @@
 "use client";
 
+import { useUsername } from "@/hooks/useUsername";
+import { client } from "@/lib/client";
+import { useMutation } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
 import { useRef, useState } from "react";
 
 const RoomPage = () => {
+  const { username } = useUsername();
   const params = useParams();
   const roomId = params.roomId as string;
 
@@ -11,6 +15,18 @@ const RoomPage = () => {
   const [timeRemaining, setTimeRemaining] = useState<number | null>(null);
   const [input, setInput] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
+
+  const { mutate: sendMessage, isPending } = useMutation({
+    mutationFn: async ({ text }: { text: string }) => {
+      await client.messages.post(
+        {
+          sender: username,
+          text,
+        },
+        { query: { roomId } }
+      );
+    },
+  });
 
   const copyLink = () => {
     const url = window.location.href;
@@ -87,8 +103,9 @@ const RoomPage = () => {
               onKeyDown={(e) => {
                 if (e.key === "Enter" && input.trim()) {
                   // SEND MESSAGE
-
-                  inputRef.current?.focus;
+                  sendMessage({ text: input });
+                  inputRef.current?.focus();
+                  setInput("");
                 }
               }}
               onChange={(e) => setInput(e.target.value)}
@@ -96,7 +113,15 @@ const RoomPage = () => {
             />
           </div>
 
-          <button className="bg-zinc-800 text-zinc-400 px-6 text-sm font-bold hover:text-zinc-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer rounded-lg">
+          <button
+            className="bg-zinc-800 text-zinc-400 px-6 text-sm font-bold hover:text-zinc-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer rounded-lg"
+            onClick={() => {
+              sendMessage({ text: input });
+              inputRef.current?.focus();
+              setInput("");
+            }}
+            disabled={!input.trim() || isPending}
+          >
             SEND
           </button>
         </div>
