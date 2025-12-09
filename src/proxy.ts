@@ -19,7 +19,7 @@ export const proxy = async (req: NextRequest) => {
   );
 
   if (!meta) {
-    return NextResponse.redirect(new URL("/?error=rooom-not-found", req.url));
+    return NextResponse.redirect(new URL("/?error=room-not-found", req.url));
   }
 
   const existingToken = req.cookies.get("x-auth-token")?.value;
